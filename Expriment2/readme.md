@@ -5,7 +5,7 @@
 ---
 ### Android布局实验——线性布局
 
-**实现代码在app/res/layout/line1234.xml中，以下为实现步骤**
+**实现代码在app/src/main/res/layout/line1234.xml中，以下为实现步骤**
 
 1.布局结构设计采用"外层垂直布局 + 内层水平布局" 的嵌套结构实现 4×4 网格。外层使用垂直方向的线性布局作为表格容器，负责容纳所有行元素；每行使用水平方向的线性布局，负责排列该行的 4 个单元格。
 
@@ -24,7 +24,7 @@
 ---
 ### Android布局实验——表格布局
 
-**实现代码在app/res/layout/table.xml中，以下为实现步骤**
+**实现代码在app/src/main/res/layout/table.xml中，以下为实现步骤**
 
 1. 整体布局结构设计
 
@@ -59,7 +59,7 @@
 ---
 ### Android布局实验——约束布局1
 
-**实现代码在app/res/layout/calculatedemo.xml中，以下为实现步骤**
+**实现代码在app/src/main/res/layout/calculatedemo.xml中，以下为实现步骤**
 
 1. 整体布局结构设计
 
@@ -101,7 +101,7 @@
 ---
 ### Android布局实验——约束布局2
 
-**实现代码在app/res/layout/rocketdemo.xml中，以下为实现步骤**
+**实现代码在app/src/main/res/layout/rocketdemo.xml中，以下为实现步骤**
 
 1. 顶部导航栏实现
 
