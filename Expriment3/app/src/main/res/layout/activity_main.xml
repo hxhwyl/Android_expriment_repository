@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="30dp"
+    tools:context=".MainActivity">
+
+
+    <Button
+        android:id="@+id/animal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="AnimalPage" />
+    <Button
+        android:id="@+id/login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="LoginPage"
+        android:layout_below="@+id/animal"/>
+    <Button
+        android:id="@+id/menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MenuPage"
+        android:layout_below="@+id/login"/>
+    <Button
+        android:id="@+id/contextmenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ContextMenuPage"
+        android:layout_below="@+id/menu"/>
+
+</RelativeLayout>
