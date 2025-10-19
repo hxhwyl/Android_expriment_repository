@@ -8,6 +8,8 @@
 
 以下为各个小实验
 
+---
+
 ## 一、动物列表展现
 
 ### （1）实验设计思路
@@ -95,6 +97,8 @@ listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 注意事项：parent.getItemAtPosition(position) 返回数据源原始数据（此处为 Map），需强制转换后提取字段。
 
 
+---
+
 ## 二、登录对话框
 
 ### （一）实验设计思路
@@ -169,6 +173,7 @@ btnCancel.setOnClickListener(v -> {
 注意事项：顺序不可颠倒，若先销毁 Activity，对话框可能因上下文丢失抛出异常。
 
 
+---
 
 ## 三、使用 XML 定义菜单
 
@@ -185,13 +190,15 @@ btnCancel.setOnClickListener(v -> {
 
 <img width="532" height="1164" alt="屏幕截图 2025-10-18 224912" src="https://github.com/user-attachments/assets/5d994b18-a395-46dd-99c0-e21429ac2ebc" />
 
-<img width="537" height="1192" alt="屏幕截图 2025-10-18 224940" src="https://github.com/user-attachments/assets/8afa34b9-c370-4350-bd85-f0bbc52b47d2" />
+
 
 
 #### 字体大小与颜色控制功能
 实现流程：点击 “字体大小” 子菜单选项，分别调用 tvTest.setTextSize(10)“16”“20” 调整文本大小；点击 “字体颜色” 子菜单选项，调用 tvTest.setTextColor(Color.RED) 或 Color.BLACK 切换颜色。
 
 实现效果：文本大小、颜色实时变化，视觉反馈直观。
+
+<img width="537" height="1192" alt="屏幕截图 2025-10-18 224940" src="https://github.com/user-attachments/assets/8afa34b9-c370-4350-bd85-f0bbc52b47d2" />
 
 <img width="547" height="1186" alt="屏幕截图 2025-10-18 224930" src="https://github.com/user-attachments/assets/5dac64b4-1145-4ea9-9e8f-0e0e8cd76d5d" />
 
@@ -272,3 +279,147 @@ public boolean onOptionsItemSelected(MenuItem item) {
 }
 ```
 注意事项：每个分支需返回 true，表示事件已消费，避免父类重复处理；setTextSize 默认单位为 sp，与布局一致。
+
+
+---
+
+
+## 四、上下文菜单
+### （一）实验设计思路
+基于 ListView 实现 ActionMode 形式的上下文菜单（长按列表项触发顶部操作栏）。
+列表层用 SimpleAdapter 绑定 “图标 + 文本” 数据，确保展示清晰；多选模式设为 CHOICE_MODE_MULTIPLE_MODAL，支持长按触发多选；MultiChoiceModeListener 监听选中状态变化，触发时创建 ActionMode 栏、加载 XML 菜单、更新选中数量标题；添加 Toolbar 作为载体，兼容 AppCompat 库。
+
+### （二）功能实现
+
+#### 多选列表展示功能
+实现流程：定义 list_item_menu.xml 布局（含 ImageView 和 TextView）；ContextMenuActivity 中通过 initData() 封装数据源（One~Five 文本 + 应用图标）；用 SimpleAdapter 绑定数据与布局，设置给 ListView。
+
+实现效果：界面显示 5 个可滚动列表项，长按任意项可触发选中状态（默认显示选中背景）。
+
+<img width="529" height="1159" alt="屏幕截图 2025-10-18 225328" src="https://github.com/user-attachments/assets/c127da51-83b9-4765-8e25-cb55d8dd480d" />
+
+
+#### ActionMode 菜单触发与选中同步功能
+实现流程：配置 listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL) 开启多选模式；设置 MultiChoiceModeListener，在 onItemCheckedStateChanged 中更新选中计数（selectedCount），调用 mode.setTitle(selectedCount + " selected") 同步标题；长按列表项时，系统自动创建 ActionMode 栏，替换 Toolbar 显示。
+
+实现效果：长按单个列表项，顶部弹出 ActionMode 栏显示 “1 selected”；继续点击其他项，标题同步更新为选中数量。
+
+<img width="524" height="1151" alt="屏幕截图 2025-10-18 225647" src="https://github.com/user-attachments/assets/70df765a-97f1-4669-b695-6325fa478bca" />
+
+
+#### ActionMode 菜单操作功能
+实现流程：onCreateActionMode 中加载 context_menu.xml 菜单（含 Delete 选项）；onActionItemClicked 中匹配 R.id.menu_delete，弹出 “Delete selected items” 提示，调用 mode.finish() 关闭 ActionMode；onDestroyActionMode 中重置 selectedCount 为 0。
+
+实现效果：点击 Delete 按钮，弹出提示且 ActionMode 栏关闭。
+
+<img width="534" height="1151" alt="屏幕截图 2025-10-18 225656" src="https://github.com/user-attachments/assets/d82ca84b-0ffb-443f-93c0-9e928ceed8e1" />
+
+### （三）关键技术细节
+#### ListView 多选模式配置技术
+
+```java
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_context_menu);
+    Toolbar toolbar = findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
+
+    listView = findViewById(R.id.list_view_context);
+    initData();
+    initAdapter();
+    listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL); // 关键
+listView.setMultiChoiceModeListener(...);}
+```
+注意事项：该模式仅对 `AbsListView` 子类（如 `ListView`）生效，开启后长按列表项会自动触发 `ActionMode`，无需额外设置长按监听。
+
+#### MultiChoiceModeListener 回调逻辑技术
+
+处理选中状态变化、菜单创建与点击，核心代码如下：
+```java
+listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+    @Override
+    public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+        // 更新选中计数
+        selectedCount = checked ? selectedCount + 1 : selectedCount - 1;
+        // 同步 ActionMode 标题
+        mode.setTitle(selectedCount + " selected");
+    }
+
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // 加载菜单资源
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+        return true; // 必须返回 true，否则菜单不显示
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false; // 无需额外准备，返回 false
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        if (item.getItemId() == R.id.menu_delete) {
+            Toast.makeText(ContextMenuActivity.this, "Delete selected items", Toast.LENGTH_SHORT).show();
+            mode.finish(); // 关闭 ActionMode
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode mode) {
+        selectedCount = 0; // 重置选中计数
+    }
+});
+```
+注意事项：onCreateActionMode 必须返回 true，否则 ActionMode 会立即销毁；mode.setTitle() 仅在 ActionMode 显示期间有效，关闭后标题恢复为 Toolbar 原标题。
+
+#### ActionMode 菜单 XML 定义技术菜单需使用 AppCompat 命名空间，确保兼容性：
+```xml
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_delete"
+        android:title="Delete"
+        android:icon="@android:drawable/ic_menu_delete"
+        app:showAsAction="ifRoom" /> <!-- 有空间则显示在 ActionMode 栏 -->
+</menu>
+```
+注意事项：推荐使用系统自带图标（如 @android:drawable/ic_menu_delete），保持与系统风格一致；app:showAsAction="ifRoom" 确保菜单在空间充足时显示图标 + 文本，空间不足时仅显示文本。
+
+#### SimpleAdapter 数据适配技术确保数据源键名、控件 ID 与适配器参数一一对应：
+```java
+// 初始化数据源
+private void initData() {
+    dataList = new ArrayList<>();
+    String[] texts = {"One", "Two", "Three", "Four", "Five"};
+    for (int i = 0; i < texts.length; i++) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("icon", R.mipmap.ic_launcher); // 键名“icon”对应图标
+        map.put("text", texts[i]);             // 键名“text”对应文本
+        dataList.add(map);
+    }
+}
+// 初始化适配器
+private void initAdapter() {
+    adapter = new SimpleAdapter(
+            this,
+            dataList,
+            R.layout.list_item_menu,
+            new String[]{"icon", "text"}, // 数据源键名
+            new int[]{R.id.iv_icon, R.id.tv_text} // 列表项控件 ID
+    );
+    listView.setAdapter(adapter);
+}
+```
+注意事项：数据源键名需与适配器 from 参数一致，控件 ID 需与 to 参数一致，且控件类型匹配（如 “icon” 对应 ImageView，“text” 对应 TextView），否则数据无法绑定。
+
+
+---
+
+## 总结
+本次实验完成了动物列表、登录对话框、XML 菜单、上下文菜单四大功能模块的开发，核心围绕 Android 基础控件（ListView、Dialog、Toolbar）与交互逻辑（点击监听、ActionMode）展开。通过 SimpleAdapter 实现数据与界面的绑定，通过 XML 定义结构化菜单与布局。实验过程中重点解决了数据适配、菜单载体、等关键问题，为后续复杂 Android 应用开发奠定了基础。
+
