@@ -190,6 +190,7 @@ btnCancel.setOnClickListener(v -> {
 
 <img width="532" height="1164" alt="屏幕截图 2025-10-18 224912" src="https://github.com/user-attachments/assets/5d994b18-a395-46dd-99c0-e21429ac2ebc" />
 
+<img width="522" height="1155" alt="image" src="https://github.com/user-attachments/assets/09ed9766-52f6-49d6-9ebd-9027386e08bc" />
 
 
 
