@@ -33,7 +33,10 @@
 
 实现效果：点击任意列表项（如 “Lion”），屏幕底部弹出提示框，实时显示选中的动物名称。
 
-<img width="534" height="1114" alt="屏幕截图 2025-10-18 224609" src="https://github.com/user-attachments/assets/9be0785a-afb7-4adc-b133-37a743c15a46" />
+
+<img width="543" height="1163" alt="image" src="https://github.com/user-attachments/assets/c8fee791-1839-48cb-aad2-d97f4426c4fd" />
+
+
 
 
 #### 列表项点击通知发送功能
@@ -87,6 +90,9 @@ private void createNotificationChannel() {
 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        // 设置当前点击项为选中状态
+        view.setSelected(true);
         Map<String, Object> selectedItem = (Map<String, Object>) parent.getItemAtPosition(position);
         String animalName = (String) selectedItem.get("name");
         Toast.makeText(AnimalActivity.this, animalName, Toast.LENGTH_SHORT).show();
