@@ -84,6 +84,11 @@ public class AnimalActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                // 设置当前点击项为选中状态
+                view.setSelected(true);
+
+
                 // 获取选中的数据
                 Map<String, Object> selectedItem = (Map<String, Object>) parent.getItemAtPosition(position);
                 String animalName = (String) selectedItem.get("name");
