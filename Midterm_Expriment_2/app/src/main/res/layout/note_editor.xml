@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="100dp"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:background="#F0F0F0">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="分类: " />
+
+        <EditText
+            android:id="@+id/category_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Default"
+            android:singleLine="true"/>
+
+        <CheckBox
+            android:id="@+id/todo_check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="设为待办" />
+
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_due_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingBottom="5dp"
+        android:textColor="#FF5722"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:text="提醒时间: " />
+
+    <EditText
+        android:id="@+id/note"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:padding="5dp"
+        android:gravity="top"
+        android:textSize="22sp"
+        android:capitalize="sentences"
+        android:inputType="textMultiLine" />
+
+</LinearLayout>
