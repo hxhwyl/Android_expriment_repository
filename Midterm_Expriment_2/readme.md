@@ -28,6 +28,10 @@
 
 页面交互：NotesList（笔记列表页）展示数据，NoteEditor（编辑页）处理新增 / 编辑操作，通过 Intent 传递数据 URI。
 
+ContentResolver 是 Android 系统提供的 “数据访问中介”，UI 层通过它调用 ContentProvider，无需直接操作数据库，符合 “单一职责原则”。
+
+新增笔记时，NoteEditor 先通过 insert 生成唯一 URI（如 content://com.google.provider.NotePad/notes/1），后续编辑、删除都基于该 URI 定位数据。
+
 ### 3. 核心代码块及解释
 #### （1）数据模型定义（NotePad.java）
 
@@ -125,9 +129,32 @@ private void saveNote() {
 
 保存时收集编辑页输入的内容、分类、待办状态等信息，封装为 ContentValues。通过 getContentResolver().update 调用 ContentProvider 更新数据库，同时更新修改时间戳。联动 setAlarm 方法，实现 “待办状态变更→提醒闹钟同步”。
 
+#### (4)编辑笔记时的光标处理逻辑（NoteEditor.onResume）
+```java
+@Override
+protected void onResume() {
+    super.onResume();
+    mCursor = getContentResolver().query(mUri, PROJECTION, null, null, null);
+    if (mCursor != null && mCursor.moveToFirst()) {
+        // 读取数据库字段并填充到UI
+        mText.setText(mCursor.getString(mCursor.getColumnIndexOrThrow(NotePad.Notes.COLUMN_NAME_NOTE)));
+        mCategoryText.setText(mCursor.getString(mCursor.getColumnIndexOrThrow(NotePad.Notes.COLUMN_NAME_CATEGORY)));
+        int isTodo = mCursor.getInt(mCursor.getColumnIndexOrThrow(NotePad.Notes.COLUMN_NAME_IS_TODO));
+        mTodoCheck.setChecked(isTodo == 1);
+        mDueDate = mCursor.getLong(mCursor.getColumnIndexOrThrow(NotePad.Notes.COLUMN_NAME_DUE_DATE));
+        updateDueDateDisplay();
+        mNoteTitle = mCursor.getString(mCursor.getColumnIndexOrThrow(NotePad.Notes.COLUMN_NAME_TITLE));
+        setTitle(mNoteTitle);
+    }
+}
+```
 
+解释：
 
-
+getContentResolver().query(...)：向 ContentProvider 发起查询请求，参数分别为：数据 URI、查询字段数组、查询条件、条件参数、排序规则。
+mCursor.moveToFirst()：将光标移动到查询结果的第一行（编辑笔记时仅返回一条数据），若返回 true 表示查询成功。
+getColumnIndexOrThrow(...)：获取字段在 Cursor 中的索引位置，若字段不存在则抛出异常（避免空指针）。
+从 Cursor 中读取对应字段的值，填充到 EditText、CheckBox 等 UI 组件，实现 “数据回显”。
 
 
 
@@ -965,7 +992,37 @@ public class ReminderReceiver extends BroadcastReceiver {
 
 
 
+## 三、关键技术点总结与关联
+### 时间戳	
+核心API/技术：System.currentTimeMillis()、SimpleDateFormat	
+关键逻辑关联：创建 / 修改笔记时自动赋值，列表页格式化展示
 
+### 搜索	
+核心API/技术：ContentResolver.query、LIKE 模糊查询	 
+
+关键逻辑关联：输入字符实时触发查询，筛选标题和内容字段
+
+### 分类	
+核心API/技术：DISTINCT 关键字、LoaderManager	
+
+关键逻辑关联：去重查询分类，选择后重启 Loader 刷新列表
+
+### 待办提醒	
+核心API/技术：AlarmManager、BroadcastReceiver、NotificationChannel	
+
+关键逻辑关联：标记待办→设置闹钟→接收广播→发送通知→点击跳转
+
+
+### 核心设计思想：
+
+数据分层：
+通过 ContentProvider 封装数据库操作，UI 层与数据层解耦，便于维护和扩展。
+
+兼容性适配：
+针对 Android 8.0+ 通知通道、Android 12+ 精确闹钟权限和 PendingIntent 标志位进行适配，确保应用在不同版本系统上正常运行。
+
+用户体验优化：
+实时搜索、分类筛选、时间回显、过期提示等细节处理，提升应用易用性。
 
 
 
